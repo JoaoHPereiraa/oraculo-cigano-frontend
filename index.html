@@ -381,7 +381,8 @@
           divTema.appendChild(divTempo);
 
           try {
-            await waitForRateLimit(); // Garante o espaçamento entre requisições
+            // Espaça as requisições com um delay fixo para evitar estouro do limite
+            await new Promise(resolve => setTimeout(resolve, CONFIG.REQUEST_DELAY));
             const mensagem = await gerarMensagemIntuitiva(carta1, carta2, tempos[t], temas[l]);
             divTempo.innerHTML = `<h3>${tempos[t]}</h3><p><strong>${carta1}</strong> e <strong>${carta2}</strong>: ${mensagem}</p>`;
           } catch (error) {
