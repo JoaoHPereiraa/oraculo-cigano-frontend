@@ -2,19 +2,30 @@
 const CONFIG = {
     // Em produção, usa a URL do Render, em desenvolvimento usa localhost
     BACKEND_URL: (() => {
-        const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-        console.log('Ambiente detectado:', isDev ? 'Desenvolvimento' : 'Produção');
-        return isDev ? 'http://localhost:3000' : 'https://oraculo-cigano-backend.onrender.com';
+        // Verifica se está rodando no GitHub Pages
+        const isGitHubPages = window.location.hostname.includes('github.io');
+        console.log('Detectado GitHub Pages:', isGitHubPages);
+
+        // Se estiver no GitHub Pages, usa a URL do Render
+        if (isGitHubPages) {
+            console.log('Usando URL do Render em produção');
+            return 'https://oraculo-cigano-backend.onrender.com';
+        }
+
+        // Se estiver em localhost, usa localhost
+        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        console.log('Ambiente detectado:', isLocalhost ? 'Desenvolvimento (localhost)' : 'Desenvolvimento (outro)');
+        return isLocalhost ? 'http://localhost:3000' : 'https://oraculo-cigano-backend.onrender.com';
     })(),
     MAX_REQUESTS_PER_MINUTE: 60,
     REQUEST_DELAY: 250
 };
 
-// Função para tentar diferentes portas (apenas em desenvolvimento)
+// Função para tentar diferentes portas (apenas em desenvolvimento local)
 async function encontrarPortaBackend() {
-    // Em produção, retorna null imediatamente
+    // Se não estiver em localhost, retorna null imediatamente
     if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-        console.log('Em produção, pulando busca de porta');
+        console.log('Não está em localhost, pulando busca de porta');
         return null;
     }
 
@@ -56,42 +67,36 @@ async function encontrarPortaBackend() {
 
 // Função para inicializar a conexão com o backend
 async function inicializarBackend() {
-    const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-
-    // Em produção, retorna true imediatamente sem tentar inicializar
-    if (!isDev) {
-        console.log('Ambiente de produção detectado, usando URL do Render:', CONFIG.BACKEND_URL);
+    // Se estiver no GitHub Pages, retorna true imediatamente
+    if (window.location.hostname.includes('github.io')) {
+        console.log('GitHub Pages detectado, usando URL do Render:', CONFIG.BACKEND_URL);
         return true;
     }
 
-    try {
-        const porta = await encontrarPortaBackend();
-        if (porta) {
-            CONFIG.BACKEND_URL = `http://localhost:${porta}`;
-            console.log('Backend configurado para desenvolvimento:', CONFIG.BACKEND_URL);
+    // Se estiver em localhost, tenta encontrar a porta
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        try {
+            const porta = await encontrarPortaBackend();
+            if (porta) {
+                CONFIG.BACKEND_URL = `http://localhost:${porta}`;
+                console.log('Backend configurado para desenvolvimento:', CONFIG.BACKEND_URL);
+            }
+            return true;
+        } catch (error) {
+            console.error('Erro ao inicializar backend:', error);
+            return false;
         }
-        return true;
-    } catch (error) {
-        console.error('Erro ao inicializar backend:', error);
-        return false;
     }
+
+    // Para qualquer outro ambiente, usa a URL do Render
+    console.log('Usando URL do Render:', CONFIG.BACKEND_URL);
+    return true;
 }
 
 async function gerarMensagemIntuitiva(c1, c2, tempo, tema) {
-    const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-
-    // Em produção, usa diretamente a URL do Render sem tentar inicializar
-    if (!isDev) {
-        console.log('Usando backend em produção:', CONFIG.BACKEND_URL);
-    } else {
-        // Em desenvolvimento, tenta inicializar o backend
-        if (!await inicializarBackend()) {
-            throw new Error('Não foi possível conectar ao servidor. Por favor, verifique se o servidor está rodando.');
-        }
-    }
-
     // Garante que a URL do backend está definida corretamente
     if (!CONFIG.BACKEND_URL) {
+        console.error('URL do backend não está definida!');
         throw new Error('URL do backend não está configurada corretamente');
     }
 
@@ -144,7 +149,7 @@ async function gerarMensagemIntuitiva(c1, c2, tempo, tema) {
             message: error.message,
             stack: error.stack,
             url: CONFIG.BACKEND_URL,
-            isDev: isDev
+            hostname: window.location.hostname
         });
         throw new Error(`Não foi possível gerar a interpretação: ${error.message}`);
     }
