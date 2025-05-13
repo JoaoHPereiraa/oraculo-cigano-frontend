@@ -287,44 +287,37 @@
       }
     }
 
-    // Variável para controlar o rate limiting
-    let lastRequestTime = 0;
-    let requestsThisMinute = 0;
-    let minuteStartTime = Date.now();
+    const requestQueue = [];
+    let isProcessingQueue = false;
 
-    async function waitForRateLimit() {
-      const now = Date.now();
+    async function processQueue() {
+      if (isProcessingQueue) return;
+      isProcessingQueue = true;
 
-      // Reset contador a cada minuto
-      if (now - minuteStartTime >= 60000) {
-        requestsThisMinute = 0;
-        minuteStartTime = now;
+      while (requestQueue.length > 0) {
+        const { resolve, reject, request } = requestQueue.shift();
+        try {
+          const result = await request();
+          resolve(result);
+        } catch (error) {
+          reject(error);
+        }
+        await new Promise(resolve => setTimeout(resolve, CONFIG.REQUEST_DELAY));
       }
 
-      // Ajustar limite de requisições para ser mais permissivo
-      if (requestsThisMinute >= CONFIG.MAX_REQUESTS_PER_MINUTE) {
-        const waitTime = 1000;
-        console.warn(`Limite de requisições atingido. Aguardando ${Math.ceil(waitTime / 1000)} segundos...`);
-        await new Promise(resolve => setTimeout(resolve, waitTime));
-        requestsThisMinute = 0;
-        minuteStartTime = Date.now();
-      }
+      isProcessingQueue = false;
+    }
 
-      // Garantir delay mínimo entre requisições
-      const timeSinceLastRequest = now - lastRequestTime;
-      if (timeSinceLastRequest < CONFIG.REQUEST_DELAY) {
-        const delay = CONFIG.REQUEST_DELAY - timeSinceLastRequest;
-        console.warn(`Aguardando ${delay}ms para evitar requisições rápidas demais.`);
-        await new Promise(resolve => setTimeout(resolve, delay));
-      }
-
-      lastRequestTime = Date.now();
-      requestsThisMinute++;
+    function enqueueRequest(request) {
+      return new Promise((resolve, reject) => {
+        requestQueue.push({ resolve, reject, request });
+        processQueue();
+      });
     }
 
     async function gerarMensagemIntuitiva(c1, c2, tempo, tema) {
       console.log('Iniciando geração de interpretação para:', { c1, c2, tempo, tema });
-      try {
+      return enqueueRequest(async () => {
         const response = await fetch(`${CONFIG.BACKEND_URL}/api/interpretacao`, {
           method: 'POST',
           headers: {
@@ -351,10 +344,7 @@
         const data = await response.json();
         console.log('Resposta recebida do servidor:', data);
         return data.interpretacao;
-      } catch (error) {
-        console.error('Erro ao gerar interpretação:', error);
-        throw new Error(error.message);
-      }
+      });
     }
 
     async function gerarInterpretacoes(cartasDistribuidas) {
@@ -381,8 +371,6 @@
           divTema.appendChild(divTempo);
 
           try {
-            // Espaça as requisições com um delay fixo para evitar estouro do limite
-            await new Promise(resolve => setTimeout(resolve, CONFIG.REQUEST_DELAY));
             const mensagem = await gerarMensagemIntuitiva(carta1, carta2, tempos[t], temas[l]);
             divTempo.innerHTML = `<h3>${tempos[t]}</h3><p><strong>${carta1}</strong> e <strong>${carta2}</strong>: ${mensagem}</p>`;
           } catch (error) {
