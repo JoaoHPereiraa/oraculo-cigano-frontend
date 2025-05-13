@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oráculo Cigano - Baralho Lenormand</title>
+  <style>
+    body {
+      font-family: 'Georgia', serif;
+      background: url('https://images.unsplash.com/photo-1581269624364-6308cb3805f9?auto=format&fit=crop&w=1950&q=80') no-repeat center center fixed;
+      background-size: cover;
+      color: #f5f0ea;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #ffd700;
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px #000;
+    }
+
+    .botao-embaralhar {
+      display: block;
+      margin: 0 auto 30px auto;
+      padding: 12px 25px;
+      font-size: 1.1em;
+      background-color: #ffd700;
+      color: #1e1e1e;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+    }
+
+    .grade {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 10px;
+      margin-bottom: 40px;
+    }
+
+    .carta {
+      background-color: rgba(255, 250, 240, 0.9);
+      border: 2px solid #ffd700;
+      border-radius: 8px;
+      padding: 5px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+    }
+
+    .carta img {
+      width: 100%;
+      height: auto;
+      border-radius: 5px;
+      object-fit: cover;
+    }
+
+    .carta strong {
+      display: block;
+      margin-top: 5px;
+      color: #333;
+      font-weight: bold;
+    }
+
+    .tema {
+      background-color: rgba(46, 46, 46, 0.9);
+      padding: 20px;
+      margin-bottom: 30px;
+      border-left: 5px solid #ffd700;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .tema h2 {
+      color: #ffd700;
+      margin-bottom: 15px;
+    }
+
+    .tempo h3 {
+      color: #f0e68c;
+      margin-bottom: 5px;
+    }
+
+    .tempo p {
+      font-size: 1em;
+      line-height: 1.5em;
+      color: #ddd;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #ffd700;
+      font-size: 1.2em;
+    }
+
+    .error {
+      text-align: center;
+      padding: 20px;
+      color: #ff6b6b;
+      font-size: 1.2em;
+      background-color: rgba(255, 107, 107, 0.1);
+      border-left: 4px solid #ff6b6b;
+      margin: 10px 0;
+    }
+
+    .tempo.error {
+      background-color: rgba(255, 107, 107, 0.1);
+      border-left: 4px solid #ff6b6b;
+      padding: 10px;
+      margin: 10px 0;
+    }
+
+    .tempo.error h3 {
+      color: #ff6b6b;
+    }
+
+    .tempo.error p {
+      color: #ff6b6b;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Oráculo do Baralho Cigano</h1>
+  <button class="botao-embaralhar" onclick="executarOraculo()">Realizar Leitura</button>
+  <div class="grade" id="grade-cartas"></div>
+  <div id="interpretacoes"></div>
+
+  <!-- Adicionar o arquivo de configuração -->
+  <script src="config.js"></script>
+
+  <script>
+    const temas = ["Espiritual", "Mental", "Amor", "Saúde", "Profissional", "Financeiro"];
+    const tempos = ["Passado", "Presente", "Futuro"];
+    const cartas = [
+      "O Cavaleiro", "O Trevo", "O Navio", "A Casa", "A Árvore", "As Nuvens", "A Serpente", "O Caixão",
+      "O Buquê", "A Foice", "O Chicote", "Os Pássaros", "A Criança", "A Raposa", "O Urso", "A Estrela",
+      "A Cegonha", "O Cachorro", "A Torre", "O Jardim", "A Montanha", "Os Caminhos", "Os Ratos", "O Coração",
+      "O Anel", "O Livro", "A Carta", "O Homem", "A Mulher", "Os Lírios", "O Sol", "A Lua", "A Chave",
+      "Os Peixes", "A Âncora", "A Cruz"
+    ];
+
+    let backendInicializado = false;
+
+    async function inicializarBackend() {
+      if (!backendInicializado) {
+        try {
+          console.log('Inicializando conexão com o backend...');
+          const porta = await encontrarPortaBackend();
+          CONFIG.BACKEND_URL = `http://localhost:${porta}`;
+          console.log('Backend configurado:', CONFIG.BACKEND_URL);
+          backendInicializado = true;
+          return true;
+        } catch (error) {
+          console.error('Erro ao inicializar backend:', error);
+          return false;
+        }
+      }
+      return true;
+    }
+
+    function embaralharCartas() {
+      const baralho = [...cartas];
+      for (let i = baralho.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [baralho[i], baralho[j]] = [baralho[j], baralho[i]];
+      }
+      return baralho;
+    }
+
+    function renderizarGrade(cartasDistribuidas) {
+      const grade = document.getElementById("grade-cartas");
+      grade.innerHTML = "";
+      cartasDistribuidas.forEach(carta => {
+        const nomeFormatado = carta.normalize("NFD").replace(/\p{Diacritic}/gu, '').replace(/ /g, "_").toLowerCase();
+        const div = document.createElement("div");
+        div.className = "carta";
+        div.innerHTML = `<img src='images/lenormand/${nomeFormatado}.jpg' alt='${carta}' onerror="this.src='images/lenormand/carta_erro.jpg'"><strong>${carta}</strong>`;
+        grade.appendChild(div);
+      });
+    }
+
+    // Variável para controlar o rate limiting
+    let lastRequestTime = 0;
+    let requestsThisMinute = 0;
+    let minuteStartTime = Date.now();
+
+    async function waitForRateLimit() {
+      const now = Date.now();
+
+      // Reset contador a cada minuto
+      if (now - minuteStartTime >= 60000) {
+        requestsThisMinute = 0;
+        minuteStartTime = now;
+      }
+
+      // Se atingiu o limite de requisições por minuto
+      if (requestsThisMinute >= CONFIG.MAX_REQUESTS_PER_MINUTE) {
+        const waitTime = 60000 - (now - minuteStartTime);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+        requestsThisMinute = 0;
+        minuteStartTime = Date.now();
+      }
+
+      // Garantir delay mínimo entre requisições
+      const timeSinceLastRequest = now - lastRequestTime;
+      if (timeSinceLastRequest < CONFIG.REQUEST_DELAY) {
+        await new Promise(resolve => setTimeout(resolve, CONFIG.REQUEST_DELAY - timeSinceLastRequest));
+      }
+
+      lastRequestTime = Date.now();
+      requestsThisMinute++;
+    }
+
+    async function gerarMensagemIntuitiva(c1, c2, tempo, tema) {
+      try {
+        await waitForRateLimit();
+
+        const response = await fetch(`${CONFIG.BACKEND_URL}/api/interpretacao`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            carta1: c1,
+            carta2: c2,
+            tempo: tempo,
+            tema: tema
+          })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Erro ao gerar interpretação');
+        }
+
+        const data = await response.json();
+        return data.interpretacao;
+      } catch (error) {
+        console.error('Erro ao gerar interpretação:', error);
+        throw new Error(`Não foi possível gerar a interpretação: ${error.message}`);
+      }
+    }
+
+    async function gerarInterpretacoes(cartasDistribuidas) {
+      const interpretacoes = document.getElementById("interpretacoes");
+      interpretacoes.innerHTML = "";
+
+      for (let l = 0; l < 6; l++) {
+        const divTema = document.createElement("div");
+        divTema.className = "tema";
+        divTema.innerHTML = `<h2>${temas[l]}</h2>`;
+        interpretacoes.appendChild(divTema);
+
+        for (let t = 0; t < 3; t++) {
+          const idx1 = l * 6 + t * 2;
+          const idx2 = idx1 + 1;
+          const carta1 = cartasDistribuidas[idx1];
+          const carta2 = cartasDistribuidas[idx2];
+
+          const divTempo = document.createElement("div");
+          divTempo.className = "tempo";
+          divTempo.innerHTML = `<h3>${tempos[t]}</h3><p style='color:#ffd700'>Aguardando interpretação...</p>`;
+          divTema.appendChild(divTempo);
+
+          // Chama a IA e atualiza o bloco assim que a resposta chega
+          gerarMensagemIntuitiva(carta1, carta2, tempos[t], temas[l])
+            .then(mensagem => {
+              divTempo.innerHTML = `<h3>${tempos[t]}</h3><p><strong>${carta1}</strong> e <strong>${carta2}</strong>: ${mensagem}</p>`;
+            })
+            .catch(error => {
+              divTempo.innerHTML = `<h3>${tempos[t]}</h3><p class="error"><strong>${carta1}</strong> e <strong>${carta2}</strong>: ${error.message}</p>`;
+            });
+        }
+      }
+    }
+
+    async function executarOraculo() {
+      try {
+        // Inicializa o backend antes de começar
+        if (!await inicializarBackend()) {
+          throw new Error('Não foi possível conectar ao servidor. Por favor, verifique se o servidor está rodando.');
+        }
+
+        const cartasDistribuidas = embaralharCartas();
+        renderizarGrade(cartasDistribuidas);
+        await gerarInterpretacoes(cartasDistribuidas);
+      } catch (error) {
+        console.error('Erro ao executar oráculo:', error);
+        const interpretacoes = document.getElementById("interpretacoes");
+        interpretacoes.innerHTML = `
+          <div class="error" style="text-align: center; padding: 20px;">
+            <h2>Erro ao conectar com o servidor</h2>
+            <p>${error.message}</p>
+            <p>Por favor, verifique se o servidor está rodando e tente novamente.</p>
+          </div>
+        `;
+      }
+    }
+  </script>
+</body>
+
+</html>

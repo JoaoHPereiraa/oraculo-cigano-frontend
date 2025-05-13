@@ -1,0 +1,173 @@
+// Configurações do backend
+const CONFIG = {
+    // Em produção, usa a URL do Render, em desenvolvimento usa localhost
+    BACKEND_URL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'http://localhost:3000'  // Desenvolvimento local
+        : 'https://oraculo-cigano-backend.onrender.com', // URL do Render em produção
+    MAX_REQUESTS_PER_MINUTE: 60,
+    REQUEST_DELAY: 250
+};
+
+// Função para tentar diferentes portas (apenas em desenvolvimento)
+async function encontrarPortaBackend() {
+    // Em produção, não precisa tentar portas diferentes
+    if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        return null;
+    }
+
+    const portas = [3000, 3001, 3002, 3003, 3004, 3005];
+    console.log('Tentando encontrar o servidor nas portas:', portas.join(', '));
+
+    for (const porta of portas) {
+        const url = `http://localhost:${porta}/api/test`;
+        console.log(`Testando porta ${porta}...`);
+
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 1000);
+
+            const response = await fetch(url, {
+                method: 'GET',
+                signal: controller.signal
+            });
+
+            clearTimeout(timeoutId);
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log(`✅ Servidor encontrado na porta ${porta}:`, data);
+                return porta;
+            }
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                console.log(`⏱️ Timeout na porta ${porta}`);
+            } else {
+                console.log(`❌ Porta ${porta} não respondeu:`, error.message);
+            }
+            continue;
+        }
+    }
+
+    throw new Error('Não foi possível encontrar o servidor em nenhuma porta. Verifique se o servidor está rodando.');
+}
+
+// Função para inicializar a conexão com o backend
+async function inicializarBackend() {
+    try {
+        const porta = await encontrarPortaBackend();
+        CONFIG.BACKEND_URL = `http://localhost:${porta}`;
+        console.log('Backend configurado:', CONFIG.BACKEND_URL);
+        return true;
+    } catch (error) {
+        console.error('Erro ao inicializar backend:', error);
+        return false;
+    }
+}
+
+async function gerarMensagemIntuitiva(c1, c2, tempo, tema) {
+    // Tenta inicializar o backend se ainda não foi feito
+    if (!await inicializarBackend()) {
+        throw new Error('Não foi possível conectar ao servidor. Por favor, verifique se o servidor está rodando.');
+    }
+
+    console.log('Tentando conectar ao backend:', CONFIG.BACKEND_URL);
+
+    try {
+        // Primeiro, testa se o servidor está respondendo
+        try {
+            const testResponse = await fetch(`${CONFIG.BACKEND_URL}/api/test`);
+            if (!testResponse.ok) {
+                throw new Error(`Servidor respondeu com status: ${testResponse.status}`);
+            }
+            const testData = await testResponse.json();
+            console.log('Teste de conexão com backend:', testData);
+        } catch (testError) {
+            console.error('Erro ao testar conexão com backend:', testError);
+            throw new Error(`Servidor não está respondendo: ${testError.message}`);
+        }
+
+        // Se o teste passou, faz a requisição principal
+        console.log('Enviando requisição para:', `${CONFIG.BACKEND_URL}/api/interpretacao`);
+        const response = await fetch(`${CONFIG.BACKEND_URL}/api/interpretacao`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                carta1: c1,
+                carta2: c2,
+                tempo: tempo,
+                tema: tema
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ error: 'Erro desconhecido' }));
+            console.error('Erro na resposta do servidor:', {
+                status: response.status,
+                statusText: response.statusText,
+                error: errorData
+            });
+            throw new Error(errorData.error || `Erro do servidor: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log('Resposta recebida do servidor:', data);
+        return data.interpretacao;
+    } catch (error) {
+        console.error('Erro detalhado:', {
+            message: error.message,
+            stack: error.stack,
+            url: CONFIG.BACKEND_URL
+        });
+        throw new Error(`Não foi possível gerar a interpretação: ${error.message}`);
+    }
+}
+
+async function gerarInterpretacoes(cartasDistribuidas) {
+    const interpretacoes = document.getElementById("interpretacoes");
+    interpretacoes.innerHTML = ""; // Garante que não aparece loading
+
+    // Array de promessas para todos os temas
+    const temasPromises = Array.from({ length: 6 }, async (_, l) => {
+        const divTema = document.createElement("div");
+        divTema.className = "tema";
+        divTema.innerHTML = `<h2>${temas[l]}</h2>`;
+
+        // Array de promessas para os 3 tempos
+        const promessas = [0, 1, 2].map(async t => {
+            const idx1 = l * 6 + t * 2;
+            const idx2 = idx1 + 1;
+            const carta1 = cartasDistribuidas[idx1];
+            const carta2 = cartasDistribuidas[idx2];
+
+            try {
+                const mensagem = await gerarMensagemIntuitiva(carta1, carta2, tempos[t], temas[l]);
+                return `
+                    <div class="tempo">
+                        <h3>${tempos[t]}</h3>
+                        <p><strong>${carta1}</strong> e <strong>${carta2}</strong>: ${mensagem}</p>
+                    </div>
+                `;
+            } catch (error) {
+                return `
+                    <div class="tempo error">
+                        <h3>${tempos[t]}</h3>
+                        <p><strong>${carta1}</strong> e <strong>${carta2}</strong>: ${error.message}</p>
+                    </div>
+                `;
+            }
+        });
+
+        // Aguarda as 3 respostas em paralelo para o tema
+        const resultados = await Promise.all(promessas);
+        resultados.forEach(html => divTema.innerHTML += html);
+        return divTema;
+    });
+
+    // Aguarda todos os temas em paralelo
+    const blocos = await Promise.all(temasPromises);
+
+    // Exibe todos os blocos
+    blocos.forEach(divTema => interpretacoes.appendChild(divTema));
+} 
