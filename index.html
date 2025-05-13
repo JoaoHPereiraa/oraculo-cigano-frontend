@@ -273,7 +273,6 @@
       const tempos = ["Passado", "Presente", "Futuro"];
 
       for (let l = 0; l < temas.length; l++) {
-        // Adiciona o rótulo da linha na primeira coluna
         const rowLabel = document.createElement("div");
         rowLabel.className = "row-label";
         rowLabel.textContent = temas[l];
@@ -285,12 +284,14 @@
           const carta1 = cartasDistribuidas[idx1];
           const carta2 = cartasDistribuidas[idx2];
 
-          // Adiciona as cartas
           const div = document.createElement("div");
           div.className = "carta";
+
           const normalizedCarta1 = normalizeString(carta1);
-          div.innerHTML = `<img src='images/lenormand/${String(idx1 + 1).padStart(2, '0')}_${normalizedCarta1}.jpg' alt='${carta1}' onerror="this.src='images/lenormand/carta_erro.jpg'" style='width: 100%; height: auto;'><strong>${carta1}</strong>`;
-          console.log(`Imagem gerada: images/lenormand/${String(idx1 + 1).padStart(2, '0')}_${normalizedCarta1}.jpg`);
+          const imagePath = `images/lenormand/${String(idx1 + 1).padStart(2, '0')}_${normalizedCarta1}.jpg`;
+
+          div.innerHTML = `<img src='${imagePath}' alt='${carta1}' onerror="this.src='images/lenormand/carta_erro.jpg'" style='width: 100%; height: auto;'><strong>${carta1}</strong>`;
+          console.log(`Imagem gerada: ${imagePath}`);
           grade.appendChild(div);
         }
       }
@@ -313,6 +314,7 @@
       // Se atingiu o limite de requisições por minuto
       if (requestsThisMinute >= CONFIG.MAX_REQUESTS_PER_MINUTE) {
         const waitTime = 60000 - (now - minuteStartTime);
+        console.warn(`Limite de requisições atingido. Aguardando ${Math.ceil(waitTime / 1000)} segundos...`);
         await new Promise(resolve => setTimeout(resolve, waitTime));
         requestsThisMinute = 0;
         minuteStartTime = Date.now();
@@ -321,7 +323,9 @@
       // Garantir delay mínimo entre requisições
       const timeSinceLastRequest = now - lastRequestTime;
       if (timeSinceLastRequest < CONFIG.REQUEST_DELAY) {
-        await new Promise(resolve => setTimeout(resolve, CONFIG.REQUEST_DELAY - timeSinceLastRequest));
+        const delay = CONFIG.REQUEST_DELAY - timeSinceLastRequest;
+        console.warn(`Aguardando ${delay}ms para evitar requisições rápidas demais.`);
+        await new Promise(resolve => setTimeout(resolve, delay));
       }
 
       lastRequestTime = Date.now();
