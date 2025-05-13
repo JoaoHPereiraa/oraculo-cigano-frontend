@@ -148,7 +148,14 @@
 
     async function inicializarBackend() {
       if (!backendInicializado) {
-        // Só tenta buscar porta se estiver em localhost
+        // Em produção (GitHub Pages), não tenta inicializar o backend
+        if (window.location.hostname.includes('github.io')) {
+          console.log('GitHub Pages detectado, usando URL do Render:', CONFIG.BACKEND_URL);
+          backendInicializado = true;
+          return true;
+        }
+
+        // Em desenvolvimento (localhost), tenta encontrar a porta
         if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
           try {
             console.log('Inicializando conexão com o backend (localhost)...');
@@ -161,11 +168,12 @@
             console.error('Erro ao inicializar backend:', error);
             return false;
           }
-        } else {
-          // Em produção, não faz nada, só marca como inicializado
-          backendInicializado = true;
-          return true;
         }
+
+        // Para qualquer outro ambiente, usa a URL do Render
+        console.log('Usando URL do Render:', CONFIG.BACKEND_URL);
+        backendInicializado = true;
+        return true;
       }
       return true;
     }
