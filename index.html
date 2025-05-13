@@ -10,211 +10,167 @@
     rel="stylesheet">
   <style>
     :root {
-      --cor-primaria: #2c1b47;
+      --cor-primaria: #4b0082;
+      /* Índigo */
       --cor-secundaria: #ffd700;
-      --cor-texto: #f5f0ea;
-      --cor-destaque: #9b59b6;
-      --cor-fundo: #1a1a1a;
+      /* Dourado */
+      --cor-texto: #f8f8ff;
+      /* Ghost White */
+      --cor-destaque: #8a2be2;
+      /* Azul Violeta */
+      --cor-fundo: #2e0854;
+      /* Roxo Escuro */
     }
 
     body {
       font-family: 'Playfair Display', serif;
-      background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
-        url('https://images.unsplash.com/photo-1581269624364-6308cb3805f9?auto=format&fit=crop&w=1950&q=80') no-repeat center center fixed;
-      background-size: cover;
+      background: linear-gradient(135deg, var(--cor-fundo), var(--cor-primaria));
       color: var(--cor-texto);
       padding: 20px;
-      min-height: 100vh;
       margin: 0;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
+      min-height: 100vh;
     }
 
     .header {
       text-align: center;
-      padding: 40px 0;
-      background: rgba(44, 27, 71, 0.8);
-      border-radius: 15px;
+      padding: 50px 0;
+      background: rgba(75, 0, 130, 0.9);
+      border-radius: 20px;
       margin-bottom: 40px;
-      box-shadow: 0 0 20px rgba(155, 89, 182, 0.3);
-      border: 1px solid var(--cor-secundaria);
+      box-shadow: 0 0 30px rgba(138, 43, 226, 0.5);
+      border: 2px solid var(--cor-secundaria);
     }
 
     h1 {
       font-family: 'Cinzel', serif;
       color: var(--cor-secundaria);
-      font-size: 3em;
+      font-size: 3.5em;
       margin: 0;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-      letter-spacing: 2px;
+      text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
     }
 
     .subtitle {
       font-style: italic;
       color: var(--cor-texto);
-      font-size: 1.2em;
-      margin-top: 10px;
-      opacity: 0.9;
+      font-size: 1.5em;
+      margin-top: 15px;
+      opacity: 0.95;
     }
 
     .botao-embaralhar {
       display: block;
       margin: 0 auto 30px auto;
-      padding: 15px 30px;
-      font-size: 1.2em;
+      padding: 20px 40px;
+      font-size: 1.5em;
       font-family: 'Cinzel', serif;
       background: linear-gradient(45deg, var(--cor-primaria), var(--cor-destaque));
       color: var(--cor-secundaria);
-      border: 2px solid var(--cor-secundaria);
-      border-radius: 8px;
+      border: 3px solid var(--cor-secundaria);
+      border-radius: 12px;
       cursor: pointer;
       font-weight: bold;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
       transition: all 0.3s ease;
     }
 
     .botao-embaralhar:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(155, 89, 182, 0.4);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(138, 43, 226, 0.6);
     }
 
-    .botao-embaralhar:disabled {
-      background: #666;
-      border-color: #999;
-      cursor: not-allowed;
-      opacity: 0.7;
+    .grade-header {
+      display: grid;
+      grid-template-columns: 1fr repeat(3, 1fr);
+      margin-bottom: 10px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 1.2em;
+      color: var(--cor-secundaria);
+    }
+
+    .grade-header div {
+      padding: 5px;
     }
 
     .grade {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 20px;
-      margin-bottom: 40px;
-      padding: 20px;
-      background: rgba(44, 27, 71, 0.6);
-      border-radius: 15px;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+      grid-template-columns: 1fr repeat(3, 1fr);
+      gap: 25px;
+      margin-bottom: 50px;
+      padding: 25px;
+      background: rgba(75, 0, 130, 0.8);
+      border-radius: 20px;
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.4);
+    }
+
+    .grade-label {
+      text-align: center;
+      font-weight: bold;
+      font-size: 1.1em;
+      color: var(--cor-secundaria);
+    }
+
+    .row-label {
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      text-align: center;
+      font-weight: bold;
+      font-size: 1.1em;
+      color: var(--cor-secundaria);
+      align-self: center;
     }
 
     .carta {
       background: rgba(255, 250, 240, 0.95);
-      border: 2px solid var(--cor-secundaria);
-      border-radius: 12px;
-      padding: 10px;
+      border: 3px solid var(--cor-secundaria);
+      border-radius: 15px;
+      padding: 15px;
       text-align: center;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
       transition: transform 0.3s ease;
     }
 
     .carta:hover {
-      transform: translateY(-5px);
+      transform: translateY(-8px);
     }
 
     .carta img {
       width: 100%;
       height: auto;
-      border-radius: 8px;
+      border-radius: 10px;
       object-fit: cover;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    }
-
-    .carta strong {
-      display: block;
-      margin-top: 10px;
-      color: var(--cor-primaria);
-      font-weight: bold;
-      font-size: 0.9em;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
     }
 
     .tema {
-      background: rgba(44, 27, 71, 0.8);
-      padding: 25px;
-      margin-bottom: 30px;
-      border-radius: 15px;
-      border-left: 5px solid var(--cor-secundaria);
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      background: rgba(75, 0, 130, 0.9);
+      padding: 30px;
+      margin-bottom: 40px;
+      border-radius: 20px;
+      border-left: 6px solid var(--cor-secundaria);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
     }
 
     .tema h2 {
       font-family: 'Cinzel', serif;
       color: var(--cor-secundaria);
-      margin-bottom: 20px;
-      font-size: 1.8em;
+      margin-bottom: 25px;
+      font-size: 2em;
       text-align: center;
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-    }
-
-    .tempo {
-      background: rgba(26, 26, 26, 0.7);
-      padding: 20px;
-      margin: 15px 0;
-      border-radius: 10px;
-      border: 1px solid rgba(255, 215, 0, 0.3);
-    }
-
-    .tempo h3 {
-      font-family: 'Cinzel', serif;
-      color: var(--cor-secundaria);
-      margin-bottom: 10px;
-      font-size: 1.3em;
-    }
-
-    .tempo p {
-      font-size: 1.1em;
-      line-height: 1.6;
-      color: var(--cor-texto);
-      margin: 0;
-    }
-
-    .loading {
-      text-align: center;
-      padding: 20px;
-      color: var(--cor-secundaria);
-      font-size: 1.2em;
-      font-style: italic;
-    }
-
-    .error {
-      text-align: center;
-      padding: 20px;
-      color: #ff6b6b;
-      font-size: 1.2em;
-      background: rgba(255, 107, 107, 0.1);
-      border-left: 4px solid #ff6b6b;
-      margin: 10px 0;
-      border-radius: 0 10px 10px 0;
-    }
-
-    .tempo.error {
-      background: rgba(255, 107, 107, 0.1);
-      border-left: 4px solid #ff6b6b;
-      padding: 15px;
-      margin: 10px 0;
-    }
-
-    .tempo.error h3 {
-      color: #ff6b6b;
-    }
-
-    .tempo.error p {
-      color: #ff6b6b;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
     }
 
     @media (max-width: 768px) {
       .grade {
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
       }
 
       h1 {
-        font-size: 2em;
+        font-size: 2.5em;
       }
 
       .tema h2 {
-        font-size: 1.5em;
+        font-size: 1.7em;
       }
     }
   </style>
@@ -228,6 +184,12 @@
     </header>
 
     <button class="botao-embaralhar" id="botao-leitura" onclick="executarOraculo()">Realizar Leitura</button>
+    <div class="grade-header">
+      <div></div> <!-- Espaço vazio para alinhar com os rótulos das linhas -->
+      <div>Passado</div>
+      <div>Presente</div>
+      <div>Futuro</div>
+    </div>
     <div class="grade" id="grade-cartas"></div>
     <div id="interpretacoes"></div>
   </div>
@@ -296,13 +258,30 @@
     function renderizarGrade(cartasDistribuidas) {
       const grade = document.getElementById("grade-cartas");
       grade.innerHTML = "";
-      cartasDistribuidas.forEach(carta => {
-        const nomeFormatado = carta.normalize("NFD").replace(/\p{Diacritic}/gu, '').replace(/ /g, "_").toLowerCase();
-        const div = document.createElement("div");
-        div.className = "carta";
-        div.innerHTML = `<img src='images/lenormand/${nomeFormatado}.jpg' alt='${carta}' onerror="this.src='images/lenormand/carta_erro.jpg'"><strong>${carta}</strong>`;
-        grade.appendChild(div);
-      });
+
+      const temas = ["Espiritual", "Mental", "Amor", "Saúde", "Profissional", "Financeiro"];
+      const tempos = ["Passado", "Presente", "Futuro"];
+
+      for (let l = 0; l < temas.length; l++) {
+        // Adiciona o rótulo da linha na primeira coluna
+        const rowLabel = document.createElement("div");
+        rowLabel.className = "row-label";
+        rowLabel.textContent = temas[l];
+        grade.appendChild(rowLabel);
+
+        for (let t = 0; t < tempos.length; t++) {
+          const idx1 = l * 6 + t * 2;
+          const idx2 = idx1 + 1;
+          const carta1 = cartasDistribuidas[idx1];
+          const carta2 = cartasDistribuidas[idx2];
+
+          // Adiciona as cartas
+          const div = document.createElement("div");
+          div.className = "carta";
+          div.innerHTML = `<img src='images/lenormand/${carta1}.jpg' alt='${carta1}'><strong>${carta1}</strong>`;
+          grade.appendChild(div);
+        }
+      }
     }
 
     // Variável para controlar o rate limiting
@@ -437,6 +416,17 @@
         botao.textContent = 'Realizar Leitura';
       }
     }
+
+    // Adiciona os cabeçalhos das colunas diretamente no HTML
+    document.addEventListener("DOMContentLoaded", () => {
+      const header = document.querySelector(".grade-header");
+      header.innerHTML = `
+        <div></div>
+        <div>Passado</div>
+        <div>Presente</div>
+        <div>Futuro</div>
+      `;
+    });
   </script>
 </body>
 
