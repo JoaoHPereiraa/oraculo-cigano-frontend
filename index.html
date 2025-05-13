@@ -135,12 +135,13 @@
     }
 
     .carta img {
-      width: 120px;
-      /* Tamanho padronizado */
-      height: 120px;
-      /* Altura padronizada para consistência */
-      border-radius: 10px;
+      width: 100px;
+      /* Reduzir largura */
+      height: 100px;
+      /* Reduzir altura */
       object-fit: cover;
+      /* Manter proporção */
+      border-radius: 10px;
       box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
     }
 
@@ -333,28 +334,28 @@
     }
 
     async function gerarMensagemIntuitiva(c1, c2, tempo, tema) {
+      console.log('Iniciando geração de interpretação para:', { c1, c2, tempo, tema });
       try {
-        await waitForRateLimit();
-
         const response = await fetch(`${CONFIG.BACKEND_URL}/api/interpretacao`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({
-            carta1: c1,
-            carta2: c2,
-            tempo: tempo,
-            tema: tema
-          })
+          body: JSON.stringify({ carta1: c1, carta2: c2, tempo, tema })
         });
 
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Erro ao gerar interpretação');
+          const errorData = await response.json().catch(() => ({ error: 'Erro desconhecido' }));
+          console.error('Erro na resposta do servidor:', {
+            status: response.status,
+            statusText: response.statusText,
+            error: errorData
+          });
+          throw new Error(errorData.error || `Erro do servidor: ${response.status} ${response.statusText}`);
         }
 
         const data = await response.json();
+        console.log('Resposta recebida do servidor:', data);
         return data.interpretacao;
       } catch (error) {
         console.error('Erro ao gerar interpretação:', error);
