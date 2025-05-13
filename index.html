@@ -292,10 +292,20 @@
           div.className = "carta";
 
           const normalizedCarta1 = normalizeString(carta1);
-          const imagePath = `images/lenormand/${String(cartas.indexOf(carta1) + 1).padStart(2, '0')}_${normalizedCarta1}.jpg`;
+          const normalizedCarta2 = normalizeString(carta2);
+          const imagePath1 = `images/lenormand/${String(cartas.indexOf(carta1) + 1).padStart(2, '0')}_${normalizedCarta1}.jpg`;
+          const imagePath2 = `images/lenormand/${String(cartas.indexOf(carta2) + 1).padStart(2, '0')}_${normalizedCarta2}.jpg`;
 
-          div.innerHTML = `<img src='${imagePath}' alt='${carta1}' onerror="this.src='images/lenormand/carta_erro.jpg'" style='width: 100%; height: auto;'><strong>${carta1}</strong>`;
-          console.log(`Imagem gerada: ${imagePath}`);
+          div.innerHTML = `
+            <div>
+              <img src='${imagePath1}' alt='${carta1}' onerror="this.src='images/lenormand/carta_erro.jpg'">
+              <strong>${carta1}</strong>
+            </div>
+            <div>
+              <img src='${imagePath2}' alt='${carta2}' onerror="this.src='images/lenormand/carta_erro.jpg'">
+              <strong>${carta2}</strong>
+            </div>
+          `;
           grade.appendChild(div);
         }
       }
@@ -387,14 +397,12 @@
           divTempo.innerHTML = `<h3>${tempos[t]}</h3><p style='color:#ffd700'>Aguardando interpretação...</p>`;
           divTema.appendChild(divTempo);
 
-          // Chama a IA e atualiza o bloco assim que a resposta chega
-          gerarMensagemIntuitiva(carta1, carta2, tempos[t], temas[l])
-            .then(mensagem => {
-              divTempo.innerHTML = `<h3>${tempos[t]}</h3><p><strong>${carta1}</strong> e <strong>${carta2}</strong>: ${mensagem}</p>`;
-            })
-            .catch(error => {
-              divTempo.innerHTML = `<h3>${tempos[t]}</h3><p class="error"><strong>${carta1}</strong> e <strong>${carta2}</strong>: ${error.message}</p>`;
-            });
+          try {
+            const mensagem = await gerarMensagemIntuitiva(carta1, carta2, tempos[t], temas[l]);
+            divTempo.innerHTML = `<h3>${tempos[t]}</h3><p><strong>${carta1}</strong> e <strong>${carta2}</strong>: ${mensagem}</p>`;
+          } catch (error) {
+            divTempo.innerHTML = `<h3>${tempos[t]}</h3><p class="error"><strong>${carta1}</strong> e <strong>${carta2}</strong>: ${error.message}</p>`;
+          }
         }
       }
     }
