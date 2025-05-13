@@ -148,16 +148,23 @@
 
     async function inicializarBackend() {
       if (!backendInicializado) {
-        try {
-          console.log('Inicializando conexão com o backend...');
-          const porta = await encontrarPortaBackend();
-          CONFIG.BACKEND_URL = `http://localhost:${porta}`;
-          console.log('Backend configurado:', CONFIG.BACKEND_URL);
+        // Só tenta buscar porta se estiver em localhost
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+          try {
+            console.log('Inicializando conexão com o backend (localhost)...');
+            const porta = await encontrarPortaBackend();
+            CONFIG.BACKEND_URL = `http://localhost:${porta}`;
+            console.log('Backend configurado:', CONFIG.BACKEND_URL);
+            backendInicializado = true;
+            return true;
+          } catch (error) {
+            console.error('Erro ao inicializar backend:', error);
+            return false;
+          }
+        } else {
+          // Em produção, não faz nada, só marca como inicializado
           backendInicializado = true;
           return true;
-        } catch (error) {
-          console.error('Erro ao inicializar backend:', error);
-          return false;
         }
       }
       return true;
