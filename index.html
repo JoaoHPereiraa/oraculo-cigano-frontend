@@ -36,6 +36,12 @@
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
     }
 
+    .botao-embaralhar:disabled {
+      background-color: #666;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
     .grade {
       display: grid;
       grid-template-columns: repeat(6, 1fr);
@@ -126,7 +132,7 @@
 
 <body>
   <h1>Oráculo do Baralho Cigano</h1>
-  <button class="botao-embaralhar" onclick="executarOraculo()">Realizar Leitura</button>
+  <button class="botao-embaralhar" id="botao-leitura" onclick="executarOraculo()">Realizar Leitura</button>
   <div class="grade" id="grade-cartas"></div>
   <div id="interpretacoes"></div>
 
@@ -299,7 +305,12 @@
     }
 
     async function executarOraculo() {
+      const botao = document.getElementById('botao-leitura');
       try {
+        // Desabilita o botão
+        botao.disabled = true;
+        botao.textContent = 'Aguarde 1 minuto...';
+
         // Inicializa o backend antes de começar
         if (!await inicializarBackend()) {
           throw new Error('Não foi possível conectar ao servidor. Por favor, verifique se o servidor está rodando.');
@@ -308,6 +319,13 @@
         const cartasDistribuidas = embaralharCartas();
         renderizarGrade(cartasDistribuidas);
         await gerarInterpretacoes(cartasDistribuidas);
+
+        // Configura um timer para reabilitar o botão após 1 minuto
+        setTimeout(() => {
+          botao.disabled = false;
+          botao.textContent = 'Realizar Leitura';
+        }, 60000); // 60 segundos = 1 minuto
+
       } catch (error) {
         console.error('Erro ao executar oráculo:', error);
         const interpretacoes = document.getElementById("interpretacoes");
@@ -318,6 +336,9 @@
             <p>Por favor, verifique se o servidor está rodando e tente novamente.</p>
           </div>
         `;
+        // Em caso de erro, reabilita o botão imediatamente
+        botao.disabled = false;
+        botao.textContent = 'Realizar Leitura';
       }
     }
   </script>
