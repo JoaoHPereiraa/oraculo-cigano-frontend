@@ -257,6 +257,14 @@
       return baralho;
     }
 
+    function normalizeString(str) {
+      return str
+        .normalize('NFD')
+        .replace(/\p{Diacritic}/gu, '')
+        .toLowerCase()
+        .replace(/ /g, '_');
+    }
+
     function renderizarGrade(cartasDistribuidas) {
       const grade = document.getElementById("grade-cartas");
       grade.innerHTML = "";
@@ -280,8 +288,9 @@
           // Adiciona as cartas
           const div = document.createElement("div");
           div.className = "carta";
-          div.innerHTML = `<img src='images/lenormand/${String(idx1 + 1).padStart(2, '0')}_${carta1.toLowerCase().replace(/ /g, '_')}.jpg' alt='${carta1}' onerror="this.src='images/lenormand/carta_erro.jpg'" style='width: 100%; height: auto;'><strong>${carta1}</strong>`;
-          console.log(`Imagem gerada: images/lenormand/${String(idx1 + 1).padStart(2, '0')}_${carta1.toLowerCase().replace(/ /g, '_')}.jpg`);
+          const normalizedCarta1 = normalizeString(carta1);
+          div.innerHTML = `<img src='images/lenormand/${String(idx1 + 1).padStart(2, '0')}_${normalizedCarta1}.jpg' alt='${carta1}' onerror="this.src='images/lenormand/carta_erro.jpg'" style='width: 100%; height: auto;'><strong>${carta1}</strong>`;
+          console.log(`Imagem gerada: images/lenormand/${String(idx1 + 1).padStart(2, '0')}_${normalizedCarta1}.jpg`);
           grade.appendChild(div);
         }
       }
