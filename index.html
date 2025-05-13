@@ -94,10 +94,13 @@
 
     .grade {
       display: grid;
-      grid-template-columns: 1fr repeat(3, 1fr);
-      gap: 25px;
+      grid-template-columns: repeat(12, 1fr);
+      /* Ajustar para 12 colunas */
+      gap: 5px;
+      /* Reduzir espaçamento entre cartas */
       margin-bottom: 50px;
-      padding: 25px;
+      padding: 10px;
+      /* Reduzir padding */
       background: rgba(75, 0, 130, 0.8);
       border-radius: 20px;
       box-shadow: 0 0 25px rgba(0, 0, 0, 0.4);
@@ -135,9 +138,9 @@
     }
 
     .carta img {
-      width: 100px;
+      width: 40px;
       /* Reduzir largura */
-      height: 100px;
+      height: 40px;
       /* Reduzir altura */
       object-fit: cover;
       /* Manter proporção */
@@ -312,9 +315,9 @@
         minuteStartTime = now;
       }
 
-      // Se atingiu o limite de requisições por minuto
-      if (requestsThisMinute >= CONFIG.MAX_REQUESTS_PER_MINUTE) {
-        const waitTime = 60000 - (now - minuteStartTime);
+      // Ajustar limite de requisições para ser mais permissivo
+      if (requestsThisMinute >= CONFIG.MAX_REQUESTS_PER_MINUTE * 2) { // Dobrar o limite permitido
+        const waitTime = 30000 - (now - minuteStartTime); // Reduzir tempo de espera para 30 segundos
         console.warn(`Limite de requisições atingido. Aguardando ${Math.ceil(waitTime / 1000)} segundos...`);
         await new Promise(resolve => setTimeout(resolve, waitTime));
         requestsThisMinute = 0;

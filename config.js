@@ -17,8 +17,8 @@ const CONFIG = {
         console.log('Ambiente detectado:', isLocalhost ? 'Desenvolvimento (localhost)' : 'Desenvolvimento (outro)');
         return isLocalhost ? 'http://localhost:3000' : 'https://oraculo-cigano-backend.onrender.com';
     })(),
-    MAX_REQUESTS_PER_MINUTE: 60,
-    REQUEST_DELAY: 250
+    MAX_REQUESTS_PER_MINUTE: 120, // Dobrar o limite de requisições por minuto
+    REQUEST_DELAY: 500 // Aumentar o intervalo entre requisições para 500ms
 };
 
 // Função para tentar diferentes portas (apenas em desenvolvimento local)
@@ -159,4 +159,4 @@ async function gerarMensagemIntuitiva(c1, c2, tempo, tema) {
 window.CONFIG = CONFIG;
 window.encontrarPortaBackend = encontrarPortaBackend;
 window.inicializarBackend = inicializarBackend;
-window.gerarMensagemIntuitiva = gerarMensagemIntuitiva; 
+window.gerarMensagemIntuitiva = gerarMensagemIntuitiva;
