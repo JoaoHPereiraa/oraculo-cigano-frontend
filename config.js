@@ -10,7 +10,7 @@ const CONFIG = {
 
 // Função para tentar diferentes portas (apenas em desenvolvimento)
 async function encontrarPortaBackend() {
-    // Em produção, não precisa tentar portas diferentes
+    // Em produção, retorna null imediatamente
     if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
         return null;
     }
@@ -53,7 +53,7 @@ async function encontrarPortaBackend() {
 
 // Função para inicializar a conexão com o backend
 async function inicializarBackend() {
-    // Em produção, não precisa inicializar
+    // Em produção, retorna true imediatamente sem tentar inicializar
     if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
         console.log('Ambiente de produção detectado, usando URL do Render:', CONFIG.BACKEND_URL);
         return true;
@@ -73,11 +73,14 @@ async function inicializarBackend() {
 }
 
 async function gerarMensagemIntuitiva(c1, c2, tempo, tema) {
-    // Em produção, não precisa inicializar o backend
+    // Em produção, usa diretamente a URL do Render
     if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
         console.log('Usando backend em produção:', CONFIG.BACKEND_URL);
-    } else if (!await inicializarBackend()) {
-        throw new Error('Não foi possível conectar ao servidor. Por favor, verifique se o servidor está rodando.');
+    } else {
+        // Em desenvolvimento, tenta inicializar o backend
+        if (!await inicializarBackend()) {
+            throw new Error('Não foi possível conectar ao servidor. Por favor, verifique se o servidor está rodando.');
+        }
     }
 
     console.log('Tentando conectar ao backend:', CONFIG.BACKEND_URL);
