@@ -278,7 +278,7 @@
           // Adiciona as cartas
           const div = document.createElement("div");
           div.className = "carta";
-          div.innerHTML = `<img src='images/lenormand/${carta1}.jpg' alt='${carta1}'><strong>${carta1}</strong>`;
+          div.innerHTML = `<img src='images/lenormand/${String(idx1 + 1).padStart(2, '0')}_${carta1.toLowerCase().replace(/ /g, '_')}.jpg' alt='${carta1}' style='width: 150px; height: auto;'><strong>${carta1}</strong>`;
           grade.appendChild(div);
         }
       }
@@ -431,4 +431,4 @@
 </body>
 
 </html>
-````
+`````
