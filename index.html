@@ -341,6 +341,11 @@
             statusText: response.statusText,
             error: errorData
           });
+
+          if (response.status === 429) {
+            throw new Error('Limite de requisições atingido. Por favor, aguarde 1 minuto antes de tentar novamente.');
+          }
+
           throw new Error(errorData.error || `Erro do servidor: ${response.status} ${response.statusText}`);
         }
 
@@ -349,7 +354,7 @@
         return data.interpretacao;
       } catch (error) {
         console.error('Erro ao gerar interpretação:', error);
-        throw new Error(`Não foi possível gerar a interpretação: ${error.message}`);
+        throw new Error(error.message);
       }
     }
 
