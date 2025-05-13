@@ -137,50 +137,8 @@ async function gerarMensagemIntuitiva(c1, c2, tempo, tema) {
     }
 }
 
-async function gerarInterpretacoes(cartasDistribuidas) {
-    const interpretacoes = document.getElementById("interpretacoes");
-    interpretacoes.innerHTML = ""; // Garante que não aparece loading
-
-    // Array de promessas para todos os temas
-    const temasPromises = Array.from({ length: 6 }, async (_, l) => {
-        const divTema = document.createElement("div");
-        divTema.className = "tema";
-        divTema.innerHTML = `<h2>${temas[l]}</h2>`;
-
-        // Array de promessas para os 3 tempos
-        const promessas = [0, 1, 2].map(async t => {
-            const idx1 = l * 6 + t * 2;
-            const idx2 = idx1 + 1;
-            const carta1 = cartasDistribuidas[idx1];
-            const carta2 = cartasDistribuidas[idx2];
-
-            try {
-                const mensagem = await gerarMensagemIntuitiva(carta1, carta2, tempos[t], temas[l]);
-                return `
-                    <div class="tempo">
-                        <h3>${tempos[t]}</h3>
-                        <p><strong>${carta1}</strong> e <strong>${carta2}</strong>: ${mensagem}</p>
-                    </div>
-                `;
-            } catch (error) {
-                return `
-                    <div class="tempo error">
-                        <h3>${tempos[t]}</h3>
-                        <p><strong>${carta1}</strong> e <strong>${carta2}</strong>: ${error.message}</p>
-                    </div>
-                `;
-            }
-        });
-
-        // Aguarda as 3 respostas em paralelo para o tema
-        const resultados = await Promise.all(promessas);
-        resultados.forEach(html => divTema.innerHTML += html);
-        return divTema;
-    });
-
-    // Aguarda todos os temas em paralelo
-    const blocos = await Promise.all(temasPromises);
-
-    // Exibe todos os blocos
-    blocos.forEach(divTema => interpretacoes.appendChild(divTema));
-} 
+// Exporta as funções necessárias
+window.CONFIG = CONFIG;
+window.encontrarPortaBackend = encontrarPortaBackend;
+window.inicializarBackend = inicializarBackend;
+window.gerarMensagemIntuitiva = gerarMensagemIntuitiva; 
