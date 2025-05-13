@@ -273,14 +273,7 @@
       const grade = document.getElementById("grade-cartas");
       grade.innerHTML = "";
 
-      const temas = ["Espiritual", "Mental", "Amor", "Saúde", "Profissional", "Financeiro"];
-
-      for (let l = 0; l < temas.length; l++) {
-        const rowLabel = document.createElement("div");
-        rowLabel.className = "row-label";
-        rowLabel.textContent = temas[l];
-        grade.appendChild(rowLabel);
-
+      for (let l = 0; l < 6; l++) {
         for (let c = 0; c < 6; c++) {
           const idx = l * 6 + c;
           const carta = cartasDistribuidas[idx];
