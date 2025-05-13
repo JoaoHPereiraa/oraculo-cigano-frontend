@@ -95,12 +95,10 @@
     .grade {
       display: grid;
       grid-template-columns: repeat(6, 1fr);
-      /* Mantém 6 colunas */
-      gap: 5px;
-      /* Reduzi o espaçamento entre as cartas */
-      margin-bottom: 50px;
-      padding: 10px;
-      /* Ajustei o padding para melhor alinhamento */
+      gap: 10px;
+      margin: 0 auto;
+      padding: 20px;
+      max-width: 90%;
       background: rgba(75, 0, 130, 0.8);
       border-radius: 20px;
       box-shadow: 0 0 25px rgba(0, 0, 0, 0.4);
@@ -128,12 +126,10 @@
       border: 3px solid var(--cor-secundaria);
       border-radius: 15px;
       padding: 10px;
-      /* Reduzi o padding para ajustar o tamanho */
       text-align: center;
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
       transition: transform 0.3s ease;
       overflow: hidden;
-      /* Garante que o conteúdo não ultrapasse os limites */
     }
 
     .carta:hover {
@@ -142,11 +138,8 @@
 
     .carta img {
       width: 100%;
-      /* Ajusta a largura para ocupar todo o espaço disponível */
       height: auto;
-      /* Mantém a proporção da imagem */
       object-fit: contain;
-      /* Garante que a imagem não seja cortada */
       border-radius: 10px;
       box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
     }
@@ -309,8 +302,8 @@
       }
 
       // Ajustar limite de requisições para ser mais permissivo
-      if (requestsThisMinute >= CONFIG.MAX_REQUESTS_PER_MINUTE * 2) { // Dobrar o limite permitido
-        const waitTime = 30000 - (now - minuteStartTime); // Reduzir tempo de espera para 30 segundos
+      if (requestsThisMinute >= CONFIG.MAX_REQUESTS_PER_MINUTE) {
+        const waitTime = 1000;
         console.warn(`Limite de requisições atingido. Aguardando ${Math.ceil(waitTime / 1000)} segundos...`);
         await new Promise(resolve => setTimeout(resolve, waitTime));
         requestsThisMinute = 0;
