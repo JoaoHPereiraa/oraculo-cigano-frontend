@@ -274,7 +274,6 @@
       grade.innerHTML = "";
 
       const temas = ["Espiritual", "Mental", "Amor", "Saúde", "Profissional", "Financeiro"];
-      const tempos = ["Passado", "Presente", "Futuro"];
 
       for (let l = 0; l < temas.length; l++) {
         const rowLabel = document.createElement("div");
@@ -282,30 +281,18 @@
         rowLabel.textContent = temas[l];
         grade.appendChild(rowLabel);
 
-        for (let t = 0; t < tempos.length; t++) {
-          const idx1 = l * 6 + t * 2;
-          const idx2 = idx1 + 1;
-          const carta1 = cartasDistribuidas[idx1];
-          const carta2 = cartasDistribuidas[idx2];
+        for (let c = 0; c < 6; c++) {
+          const idx = l * 6 + c;
+          const carta = cartasDistribuidas[idx];
 
           const div = document.createElement("div");
           div.className = "carta";
 
-          const normalizedCarta1 = normalizeString(carta1);
-          const normalizedCarta2 = normalizeString(carta2);
-          const imagePath1 = `images/lenormand/${String(cartas.indexOf(carta1) + 1).padStart(2, '0')}_${normalizedCarta1}.jpg`;
-          const imagePath2 = `images/lenormand/${String(cartas.indexOf(carta2) + 1).padStart(2, '0')}_${normalizedCarta2}.jpg`;
+          const normalizedCarta = normalizeString(carta);
+          const imagePath = `images/lenormand/${String(cartas.indexOf(carta) + 1).padStart(2, '0')}_${normalizedCarta}.jpg`;
 
-          div.innerHTML = `
-            <div>
-              <img src='${imagePath1}' alt='${carta1}' onerror="this.src='images/lenormand/carta_erro.jpg'">
-              <strong>${carta1}</strong>
-            </div>
-            <div>
-              <img src='${imagePath2}' alt='${carta2}' onerror="this.src='images/lenormand/carta_erro.jpg'">
-              <strong>${carta2}</strong>
-            </div>
-          `;
+          div.innerHTML = `<img src='${imagePath}' alt='${carta}' onerror="this.src='images/lenormand/carta_erro.jpg'">
+                           <strong>${carta}</strong>`;
           grade.appendChild(div);
         }
       }
@@ -386,11 +373,13 @@
         divTema.innerHTML = `<h2>${temas[l]}</h2>`;
         interpretacoes.appendChild(divTema);
 
+        const cartasLinha = cartasDistribuidas.slice(l * 6, l * 6 + 6);
+
         for (let t = 0; t < 3; t++) {
-          const idx1 = l * 6 + t * 2;
+          const idx1 = t * 2;
           const idx2 = idx1 + 1;
-          const carta1 = cartasDistribuidas[idx1];
-          const carta2 = cartasDistribuidas[idx2];
+          const carta1 = cartasLinha[idx1];
+          const carta2 = cartasLinha[idx2];
 
           const divTempo = document.createElement("div");
           divTempo.className = "tempo";
